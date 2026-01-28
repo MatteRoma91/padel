@@ -40,11 +40,16 @@ async function seed() {
     console.log('Inizializzazione database...');
     await initDatabase();
 
-    // Verifica se ci sono già dati
+    // Verifica se ci sono già dati e pulisci se necessario
     const existingPlayers = await db.all('SELECT COUNT(*) as count FROM players');
-    if (existingPlayers[0].count > 0) {
-      console.log('Database già popolato. Usa il reset per ricreare i dati.');
-      process.exit(0);
+    const playerCount = existingPlayers && existingPlayers[0] ? (existingPlayers[0].count || 0) : 0;
+    
+    if (playerCount > 0) {
+      console.log(`Database già popolato con ${playerCount} giocatori. Pulisco e ricreo i dati...`);
+      await db.run('DELETE FROM matches');
+      await db.run('DELETE FROM teams');
+      await db.run('DELETE FROM player_stats');
+      await db.run('DELETE FROM players');
     }
 
     console.log('Creazione giocatori...');

@@ -11,9 +11,22 @@ const dbPath = process.env.DB_PATH || path.join(__dirname, '../../database.sqlit
 const db = new sqlite3.Database(dbPath);
 
 // Promisifica i metodi del database
-db.run = promisify(db.run.bind(db));
 db.get = promisify(db.get.bind(db));
 db.all = promisify(db.all.bind(db));
+
+// Wrapper personalizzato per db.run che mantiene lastID
+const originalRun = db.run.bind(db);
+db.run = function(sql, params) {
+  return new Promise((resolve, reject) => {
+    originalRun(sql, params, function(err) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve({ lastID: this.lastID, changes: this.changes });
+      }
+    });
+  });
+};
 
 /**
  * Inizializza il database creando tutte le tabelle necessarie
