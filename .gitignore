@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Environment
+.env
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+
+# Uploads
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Build
+frontend/dist/
+backend/build/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Docker
+.docker/

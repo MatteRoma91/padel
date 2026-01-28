@@ -1,0 +1,133 @@
+.tournament-page {
+  min-height: 100vh;
+  background: var(--color-bg-light);
+  padding: 2rem 1rem;
+}
+
+.tournament-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 3rem;
+}
+
+.back-button {
+  background: white;
+  border: 2px solid var(--color-border);
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  color: var(--color-text);
+  transition: var(--transition);
+}
+
+.back-button:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.tournament-header h1 {
+  font-size: 2rem;
+  color: var(--color-text);
+}
+
+.tournament-phase {
+  margin-bottom: 4rem;
+  animation: fadeIn 0.6s ease-in;
+}
+
+.phase-title {
+  font-size: 1.5rem;
+  color: var(--color-text);
+  margin-bottom: 2rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--color-primary);
+}
+
+.semifinals-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.semifinals-group {
+  background: white;
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  border: 2px solid var(--color-border);
+}
+
+.group-title {
+  font-size: 1.25rem;
+  color: var(--color-text);
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+.matches-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.final-match-wrapper {
+  position: relative;
+}
+
+.final-label {
+  background: var(--color-primary);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+  font-weight: 600;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+.loading,
+.error {
+  text-align: center;
+  padding: 3rem;
+  font-size: 1.25rem;
+  color: var(--color-text-light);
+}
+
+.error {
+  color: var(--color-danger);
+}
+
+@media (max-width: 768px) {
+  .tournament-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .tournament-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .phase-title {
+    font-size: 1.25rem;
+  }
+
+  .matches-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .semifinals-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

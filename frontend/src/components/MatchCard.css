@@ -1,0 +1,154 @@
+.match-card {
+  background: white;
+  border: 2px solid var(--color-border);
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  transition: var(--transition);
+}
+
+.match-card.completed {
+  border-color: var(--color-success);
+  background: #F0FDF4;
+}
+
+.match-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.match-type {
+  font-weight: 600;
+  color: var(--color-text);
+  font-size: 1.1rem;
+}
+
+.match-status {
+  font-size: 0.875rem;
+  color: var(--color-success);
+  font-weight: 500;
+}
+
+.match-teams {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.team {
+  flex: 1;
+  text-align: center;
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  background: var(--color-bg-light);
+  transition: var(--transition);
+}
+
+.team.winner {
+  background: var(--color-primary);
+  color: white;
+  font-weight: 600;
+}
+
+.team-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.team-players {
+  font-size: 0.875rem;
+  opacity: 0.8;
+}
+
+.vs {
+  font-weight: 700;
+  color: var(--color-text-light);
+  font-size: 1.25rem;
+}
+
+.match-scores {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.score-input {
+  flex: 1;
+  padding: 0.75rem;
+  border: 2px solid var(--color-border);
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  text-align: center;
+  transition: var(--transition);
+}
+
+.score-input:focus {
+  border-color: var(--color-primary);
+  outline: none;
+}
+
+.score-input:disabled {
+  background: #F5F5F5;
+  cursor: not-allowed;
+}
+
+.score-separator {
+  font-weight: 600;
+  color: var(--color-text-light);
+}
+
+.update-score-button {
+  width: 100%;
+  padding: 0.875rem;
+  background: var(--color-primary);
+  color: white;
+  font-weight: 600;
+  border-radius: var(--border-radius);
+  transition: var(--transition);
+}
+
+.update-score-button:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.update-score-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.match-winner {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: var(--color-success);
+  color: white;
+  border-radius: var(--border-radius);
+  text-align: center;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .match-teams {
+    flex-direction: column;
+  }
+
+  .vs {
+    transform: rotate(90deg);
+  }
+
+  .match-scores {
+    flex-direction: column;
+  }
+
+  .score-separator {
+    display: none;
+  }
+}
