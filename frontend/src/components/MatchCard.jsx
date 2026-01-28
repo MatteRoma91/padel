@@ -19,7 +19,7 @@ function MatchCard({ match, onUpdate }) {
         team1_score: team1Score,
         team2_score: team2Score,
       });
-      
+
       if (onUpdate) {
         await onUpdate();
       }
@@ -87,6 +87,7 @@ function MatchCard({ match, onUpdate }) {
           value={team1Score}
           onChange={(e) => setTeam1Score(e.target.value)}
           disabled={loading || !!match.winner_id}
+          autoComplete="off"
         />
         <span className="score-separator">-</span>
         <input
@@ -96,6 +97,7 @@ function MatchCard({ match, onUpdate }) {
           value={team2Score}
           onChange={(e) => setTeam2Score(e.target.value)}
           disabled={loading || !!match.winner_id}
+          autoComplete="off"
         />
       </div>
 

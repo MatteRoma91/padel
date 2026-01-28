@@ -5,6 +5,7 @@
   padding: 1.5rem;
   margin-bottom: 1.5rem;
   transition: var(--transition);
+  overflow: hidden;
 }
 
 .match-card.completed {
