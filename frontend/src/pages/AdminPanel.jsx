@@ -1,22 +1,27 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTournament } from '../context/TournamentContext';
 import api from '../services/api';
 import './AdminPanel.css';
+
+const CATEGORIES = ['A_Gold', 'A_Silver', 'B_Gold', 'B_Silver', 'C'];
 
 function AdminPanel() {
   const navigate = useNavigate();
   const { players, refreshPlayers, refreshBracket } = useTournament();
   const [editingPlayer, setEditingPlayer] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [createdCredentials, setCreatedCredentials] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
-    dominant_hand: 'destra',
-    skill_level: '',
+    nickname: '',
+    category: 'C',
     avatar: null,
   });
   const [loading, setLoading] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
+  const [showTournamentForm, setShowTournamentForm] = useState(false);
+  const [tournamentForm, setTournamentForm] = useState({ name: '', date: '', time: '', field: '' });
 
   const handleInputChange = (e) => {
     const { name, value, files } = e.target;
@@ -36,13 +41,21 @@ function AdminPanel() {
 
     try {
       setLoading(true);
-      await api.createPlayer(formData);
+      setCreatedCredentials(null);
+      const data = await api.createUser({
+        name: formData.name,
+        nickname: formData.nickname || formData.name,
+        role: 'player',
+        category: formData.category,
+        photo: formData.avatar,
+      });
       await refreshPlayers();
-      setFormData({ name: '', dominant_hand: 'destra', skill_level: '', avatar: null });
+      setFormData({ name: '', nickname: '', category: 'C', avatar: null });
       setShowAddForm(false);
-      alert('Giocatore aggiunto con successo!');
+      setCreatedCredentials({ username: data.username, password: data.password });
+      alert('Utente creato! Credenziali: ' + data.username + ' / ' + data.password);
     } catch (error) {
-      alert('Errore nell\'aggiunta del giocatore: ' + error.message);
+      alert('Errore: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -52,8 +65,8 @@ function AdminPanel() {
     setEditingPlayer(player);
     setFormData({
       name: player.name,
-      dominant_hand: player.dominant_hand || 'destra',
-      skill_level: player.skill_level || '',
+      nickname: player.nickname || player.name,
+      category: player.category || 'C',
       avatar: null,
     });
     setShowAddForm(true);
@@ -68,49 +81,69 @@ function AdminPanel() {
 
     try {
       setLoading(true);
-      await api.updatePlayer(editingPlayer.id, formData);
+      await api.updateUser(editingPlayer.id, {
+        name: formData.name,
+        nickname: formData.nickname || formData.name,
+        category: formData.category,
+        photo: formData.avatar,
+      });
       await refreshPlayers();
       setEditingPlayer(null);
-      setFormData({ name: '', dominant_hand: 'destra', skill_level: '', avatar: null });
+      setFormData({ name: '', nickname: '', category: 'C', avatar: null });
       setShowAddForm(false);
-      alert('Giocatore aggiornato con successo!');
+      alert('Giocatore aggiornato!');
     } catch (error) {
-      alert('Errore nell\'aggiornamento del giocatore: ' + error.message);
+      alert('Errore: ' + error.message);
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeletePlayer = async (id) => {
-    if (!confirm('Sei sicuro di voler eliminare questo giocatore?')) {
-      return;
-    }
+    if (!confirm('Sei sicuro di voler eliminare questo giocatore?')) return;
 
     try {
       setLoading(true);
-      await api.deletePlayer(id);
+      await api.deleteUser(id);
       await refreshPlayers();
-      alert('Giocatore eliminato con successo!');
+      alert('Giocatore eliminato!');
     } catch (error) {
-      alert('Errore nell\'eliminazione del giocatore: ' + error.message);
+      alert('Errore: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateTournament = async (e) => {
+    e.preventDefault();
+    if (!tournamentForm.name || !tournamentForm.date) {
+      alert('Nome e data obbligatori');
+      return;
+    }
+    try {
+      setLoading(true);
+      await api.createTournament(tournamentForm);
+      setTournamentForm({ name: '', date: '', time: '', field: '' });
+      setShowTournamentForm(false);
+      alert('Torneo creato!');
+    } catch (error) {
+      alert('Errore: ' + error.message);
     } finally {
       setLoading(false);
     }
   };
 
   const handleResetTournament = async () => {
-    if (!confirm('Sei sicuro di voler resettare il torneo? Tutte le partite e statistiche verranno azzerate.')) {
-      return;
-    }
+    if (!confirm('Sei sicuro? Le partite verranno eliminate.')) return;
 
     try {
       setResetLoading(true);
       await api.resetTournament();
       await refreshBracket();
       await refreshPlayers();
-      alert('Torneo resettato con successo!');
+      alert('Torneo resettato!');
     } catch (error) {
-      alert('Errore nel reset del torneo: ' + error.message);
+      alert('Errore: ' + error.message);
     } finally {
       setResetLoading(false);
     }
@@ -119,7 +152,8 @@ function AdminPanel() {
   const cancelForm = () => {
     setShowAddForm(false);
     setEditingPlayer(null);
-    setFormData({ name: '', dominant_hand: 'destra', skill_level: '', avatar: null });
+    setCreatedCredentials(null);
+    setFormData({ name: '', nickname: '', category: 'C', avatar: null });
   };
 
   return (
@@ -135,9 +169,15 @@ function AdminPanel() {
         <div className="admin-actions">
           <button
             className="action-button primary"
+            onClick={() => setShowTournamentForm(!showTournamentForm)}
+          >
+            + Nuovo Torneo
+          </button>
+          <button
+            className="action-button primary"
             onClick={() => {
               setEditingPlayer(null);
-              setFormData({ name: '', dominant_hand: 'destra', skill_level: '', avatar: null });
+              setFormData({ name: '', nickname: '', category: 'C', avatar: null });
               setShowAddForm(true);
             }}
           >
@@ -148,9 +188,57 @@ function AdminPanel() {
             onClick={handleResetTournament}
             disabled={resetLoading}
           >
-            {resetLoading ? 'Reset in corso...' : '🔄 Reset Torneo'}
+            {resetLoading ? 'Reset...' : '🔄 Reset Torneo'}
           </button>
         </div>
+
+        {showTournamentForm && (
+          <div className="admin-form-container">
+            <h2>Nuovo Torneo</h2>
+            <form onSubmit={handleCreateTournament}>
+              <div className="form-group">
+                <label>Nome *</label>
+                <input
+                  type="text"
+                  value={tournamentForm.name}
+                  onChange={(e) => setTournamentForm({ ...tournamentForm, name: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Data *</label>
+                <input
+                  type="date"
+                  value={tournamentForm.date}
+                  onChange={(e) => setTournamentForm({ ...tournamentForm, date: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Ora</label>
+                <input
+                  type="text"
+                  placeholder="18:00"
+                  value={tournamentForm.time}
+                  onChange={(e) => setTournamentForm({ ...tournamentForm, time: e.target.value })}
+                />
+              </div>
+              <div className="form-group">
+                <label>Campo</label>
+                <input
+                  type="text"
+                  placeholder="Campo 1"
+                  value={tournamentForm.field}
+                  onChange={(e) => setTournamentForm({ ...tournamentForm, field: e.target.value })}
+                />
+              </div>
+              <div className="form-actions">
+                <button type="submit" className="submit-button" disabled={loading}>Crea</button>
+                <button type="button" className="cancel-button" onClick={() => setShowTournamentForm(false)}>Annulla</button>
+              </div>
+            </form>
+          </div>
+        )}
 
         {showAddForm && (
           <div className="admin-form-container">
@@ -167,34 +255,29 @@ function AdminPanel() {
                   required
                 />
               </div>
-
               <div className="form-group">
-                <label htmlFor="dominant_hand">Mano Dominante</label>
-                <select
-                  id="dominant_hand"
-                  name="dominant_hand"
-                  value={formData.dominant_hand}
-                  onChange={handleInputChange}
-                >
-                  <option value="destra">Destra</option>
-                  <option value="sinistra">Sinistra</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="skill_level">Livello di Gioco</label>
+                <label htmlFor="nickname">Nickname</label>
                 <input
                   type="text"
-                  id="skill_level"
-                  name="skill_level"
-                  value={formData.skill_level}
+                  id="nickname"
+                  name="nickname"
+                  value={formData.nickname}
                   onChange={handleInputChange}
-                  placeholder="es. principiante, intermedio, avanzato"
+                  placeholder="Nome visualizzato"
                 />
               </div>
-
               <div className="form-group">
-                <label htmlFor="avatar">Avatar</label>
+                <label htmlFor="category">Categoria</label>
+                <select id="category" name="category" value={formData.category} onChange={handleInputChange}>
+                  {CATEGORIES.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label htmlFor="avatar">Foto</label>
                 <input
                   type="file"
                   id="avatar"
@@ -203,7 +286,6 @@ function AdminPanel() {
                   onChange={handleInputChange}
                 />
               </div>
-
               <div className="form-actions">
                 <button type="submit" className="submit-button" disabled={loading}>
                   {loading ? 'Salvataggio...' : editingPlayer ? 'Aggiorna' : 'Aggiungi'}
@@ -221,8 +303,8 @@ function AdminPanel() {
           <div className="players-table">
             <div className="table-header">
               <div>Nome</div>
-              <div>Mano</div>
-              <div>Livello</div>
+              <div>Categoria</div>
+              <div>Statistiche</div>
               <div>Azioni</div>
             </div>
             {players.map((player) => (
@@ -231,15 +313,12 @@ function AdminPanel() {
                   {player.avatar_url && (
                     <img src={player.avatar_url} alt={player.name} className="player-thumb" />
                   )}
-                  <span>{player.name}</span>
+                  <span>{player.nickname || player.name}</span>
                 </div>
-                <div>{player.dominant_hand || '-'}</div>
-                <div>{player.skill_level || '-'}</div>
+                <div>{player.category || '-'}</div>
+                <div>{player.matches_played ?? 0} partite, {player.wins ?? 0}V - {player.losses ?? 0}P</div>
                 <div className="actions-cell">
-                  <button
-                    className="edit-button"
-                    onClick={() => handleEditPlayer(player)}
-                  >
+                  <button className="edit-button" onClick={() => handleEditPlayer(player)}>
                     ✏️ Modifica
                   </button>
                   <button

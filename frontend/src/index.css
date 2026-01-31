@@ -1,6 +1,7 @@
 :root {
   --color-primary: #FFD700;
   --color-primary-dark: #FFA500;
+  --color-court: #2D5A27;
   --color-text: #2C3E50;
   --color-text-light: #7F8C8D;
   --color-bg: #FFFFFF;
@@ -59,4 +60,17 @@ img {
   max-width: 100%;
   height: auto;
   display: block;
+}
+
+.loading-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-light);
+}
+
+.loading-spinner {
+  font-size: 1.1rem;
+  color: var(--color-text-light);
 }

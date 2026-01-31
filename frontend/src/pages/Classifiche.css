@@ -1,0 +1,95 @@
+.classifiche-page {
+  min-height: 100vh;
+  background: var(--color-bg-light);
+  padding: 2rem 1rem;
+}
+
+.classifiche-header {
+  margin-bottom: 2rem;
+}
+
+.classifiche-header h1 {
+  font-size: 2rem;
+  color: var(--color-text);
+}
+
+.ranking-section {
+  margin-bottom: 3rem;
+}
+
+.section-title {
+  font-size: 1.35rem;
+  color: var(--color-text);
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--color-primary);
+}
+
+.tournament-select {
+  width: 100%;
+  max-width: 400px;
+  padding: 0.5rem 1rem;
+  margin-bottom: 1rem;
+  border: 2px solid var(--color-border);
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+}
+
+.ranking-table {
+  background: white;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.ranking-table .table-header {
+  display: grid;
+  grid-template-columns: 60px 1fr 100px 80px;
+  padding: 1rem;
+  background: var(--color-primary);
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.ranking-table .table-row {
+  display: grid;
+  grid-template-columns: 60px 1fr 100px 80px;
+  padding: 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.ranking-table .table-row:last-child {
+  border-bottom: none;
+}
+
+.ranking-table .table-row:nth-child(even) {
+  background: var(--color-bg-light);
+}
+
+.ranking-table .pos {
+  font-weight: 700;
+  color: var(--color-primary-dark);
+}
+
+.ranking-table .points {
+  font-weight: 600;
+}
+
+.ranking-table .table-row .table-row {
+  grid-template-columns: 60px 1fr 80px;
+}
+
+.empty-row {
+  padding: 2rem;
+  text-align: center;
+  color: var(--color-text-light);
+}
+
+/* Per sezione torneo: 3 colonne */
+.ranking-section:last-child .table-header {
+  grid-template-columns: 60px 1fr 80px;
+}
+
+.ranking-section:last-child .table-row {
+  grid-template-columns: 60px 1fr 80px;
+}

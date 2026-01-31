@@ -5,7 +5,7 @@ function WelcomePage() {
   const navigate = useNavigate();
 
   const handleEnter = () => {
-    navigate('/home');
+    navigate('/login');
   };
 
   return (

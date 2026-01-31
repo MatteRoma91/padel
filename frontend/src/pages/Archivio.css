@@ -1,0 +1,67 @@
+.archivio-page {
+  min-height: 100vh;
+  background: var(--color-bg-light);
+  padding: 2rem 1rem;
+}
+
+.archivio-header {
+  margin-bottom: 2rem;
+}
+
+.archivio-header h1 {
+  font-size: 2rem;
+  color: var(--color-text);
+}
+
+.archivio-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.filter-input,
+.filter-select {
+  padding: 0.5rem 1rem;
+  border: 2px solid var(--color-border);
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+}
+
+.filter-input {
+  flex: 1;
+  min-width: 200px;
+}
+
+.archivio-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.archivio-card {
+  background: white;
+  border-radius: var(--border-radius);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-sm);
+  border: 2px solid var(--color-border);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.archivio-card:hover {
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+}
+
+.arch-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.arch-date,
+.arch-field {
+  font-size: 0.9rem;
+  color: var(--color-text-light);
+  margin-top: 0.25rem;
+}

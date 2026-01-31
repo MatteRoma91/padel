@@ -30,9 +30,8 @@ function MatchCard({ match, onUpdate }) {
     }
   };
 
-  const isWinner = (teamId) => {
-    return match.winner_id === teamId;
-  };
+  const isWinner = (teamId) => match.winner_id === teamId;
+  const isLoser = (teamId) => match.winner_id && match.winner_id !== teamId;
 
   const getTeam1Name = () => {
     if (match.team1_name) return match.team1_name;
@@ -58,7 +57,7 @@ function MatchCard({ match, onUpdate }) {
       </div>
 
       <div className="match-teams">
-        <div className={`team ${isWinner(match.team1_id) ? 'winner' : ''}`}>
+        <div className={`team ${isWinner(match.team1_id) ? 'winner' : ''} ${isLoser(match.team1_id) ? 'loser' : ''}`}>
           <div className="team-name">{getTeam1Name()}</div>
           {match.phase === 'quarters' && match.team1_player1_name && match.team1_player2_name && (
             <div className="team-players">
@@ -69,7 +68,7 @@ function MatchCard({ match, onUpdate }) {
 
         <div className="vs">VS</div>
 
-        <div className={`team ${isWinner(match.team2_id) ? 'winner' : ''}`}>
+        <div className={`team ${isWinner(match.team2_id) ? 'winner' : ''} ${isLoser(match.team2_id) ? 'loser' : ''}`}>
           <div className="team-name">{getTeam2Name()}</div>
           {match.phase === 'quarters' && match.team2_player1_name && match.team2_player2_name && (
             <div className="team-players">

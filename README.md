@@ -22,9 +22,13 @@ Sito web per la gestione di un torneo di padel con tabellone, giocatori, statist
 ```bash
 cd backend
 npm install
-npm run seed  # Popola il database con dati iniziali
-npm run dev   # Avvia server su http://localhost:3000
+# Per database nuovo: npm run seed
+# Per migrare da schema vecchio: npm run migrate
+npm run seed   # Popola il database (admin + 16 giocatori + torneo demo)
+npm run dev    # Avvia server su http://localhost:3000
 ```
+
+**Credenziali seed**: admin / admin123 | Player: password player123 (username generato)
 
 ### Frontend
 
@@ -97,15 +101,17 @@ padel/
 
 ## 🔧 Funzionalità
 
-- ✅ Pagina di benvenuto
-- ✅ Home page con menu
-- ✅ Tabellone torneo (Quarti, Semifinali, Finali)
-- ✅ Lista giocatori
-- ✅ Dettaglio giocatore con statistiche
-- ✅ Area amministratore (CRUD giocatori, reset torneo)
-- ✅ Calcolo automatico vincitori
-- ✅ Popolamento automatico fasi successive
-- ✅ Upload immagini giocatori
+- ✅ **Login** obbligatorio (username/password gestiti dagli admin)
+- ✅ **Ruoli** Admin e Player
+- ✅ Pagina di benvenuto e Home dashboard
+- ✅ **Tornei** multi-istanza con tabellone principale e consolazione
+- ✅ **Profili** giocatori con categorie (A Gold, A Silver, B Gold, B Silver, C)
+- ✅ **Estrazione coppie** algoritmo forte+debole
+- ✅ **Calendario** tornei
+- ✅ **Classifiche** torneo singolo e cumulativa Banana Padel Tour
+- ✅ **Archivio** tornei con filtri
+- ✅ **Export PDF** tabelloni e risultati
+- ✅ Calcolo automatico vincitori, evidenziazione vincitori/perdenti
 - ✅ HTTPS con Let's Encrypt
 
 ## 📝 Note

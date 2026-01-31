@@ -1,0 +1,102 @@
+.tornei-page {
+  min-height: 100vh;
+  background: var(--color-bg-light);
+  padding: 2rem 1rem;
+}
+
+.tornei-header {
+  margin-bottom: 2rem;
+}
+
+.tornei-header h1 {
+  font-size: 2rem;
+  color: var(--color-text);
+}
+
+.tornei-filters {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.filter-btn {
+  padding: 0.5rem 1rem;
+  border: 2px solid var(--color-border);
+  background: white;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.filter-btn.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.tornei-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.torneo-card {
+  background: white;
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  border: 2px solid var(--color-border);
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+}
+
+.torneo-card:hover {
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.torneo-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 0.5rem;
+}
+
+.torneo-date,
+.torneo-time,
+.torneo-field {
+  font-size: 0.95rem;
+  color: var(--color-text-light);
+  margin-bottom: 0.25rem;
+}
+
+.torneo-status {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.status-active {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-draft {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-completed {
+  background: #e2e3e5;
+  color: #383d41;
+}
+
+.empty {
+  text-align: center;
+  color: var(--color-text-light);
+  padding: 3rem;
+}

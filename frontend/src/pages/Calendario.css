@@ -1,0 +1,61 @@
+.calendario-page {
+  min-height: 100vh;
+  background: var(--color-bg-light);
+  padding: 2rem 1rem;
+}
+
+.calendario-header {
+  margin-bottom: 2rem;
+}
+
+.calendario-header h1 {
+  font-size: 2rem;
+  color: var(--color-text);
+}
+
+.calendario-desc {
+  font-size: 1rem;
+  color: var(--color-text-light);
+  margin-top: 0.25rem;
+}
+
+.calendario-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.calendario-card {
+  background: white;
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  border: 2px solid var(--color-border);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.calendario-card:hover {
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+}
+
+.cal-date {
+  font-size: 0.9rem;
+  color: var(--color-primary-dark);
+  font-weight: 600;
+  text-transform: capitalize;
+  margin-bottom: 0.5rem;
+}
+
+.cal-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.cal-time,
+.cal-field {
+  font-size: 0.95rem;
+  color: var(--color-text-light);
+  margin-top: 0.35rem;
+}

@@ -65,230 +65,72 @@ export function calculateWinner(team1Score, team2Score, team1Id, team2Id) {
 }
 
 /**
- * Aggiorna il tabellone torneo popolando le fasi successive
+ * Aggiorna il tabellone torneo popolando le fasi successive (nuovo schema con pairs)
  */
-export async function updateTournamentBracket(phase, matchType, winnerId, loserId) {
+export async function updateTournamentBracket(tournamentId, phase, matchType, winnerPairId, loserPairId) {
   try {
     if (phase === 'quarters') {
-      // Quarti → Semifinali
-      await populateSemifinals(matchType, winnerId, loserId);
+      await populateSemifinalsNew(tournamentId, matchType, winnerPairId, loserPairId);
     } else if (phase === 'semifinals') {
-      // Semifinali → Finali
-      await populateFinals(matchType, winnerId, loserId);
+      await populateFinalsNew(tournamentId, matchType, winnerPairId, loserPairId);
     }
   } catch (error) {
     console.error('Errore nell\'aggiornamento tabellone:', error);
   }
 }
 
-/**
- * Popola le semifinali basandosi sui risultati dei quarti
- */
-async function populateSemifinals(quarterType, winnerId, loserId) {
-  try {
-    // Mappa quarti → semifinali
-    const quarterToSemifinal = {
-      'Q1': { winner: 'A1', team1: true },
-      'Q2': { winner: 'A1', team1: false },
-      'Q3': { winner: 'A2', team1: true },
-      'Q4': { winner: 'A2', team1: false },
-    };
-
-    const semifinalLoser = {
-      'Q1': { loser: 'B1', team1: true },
-      'Q2': { loser: 'B1', team1: false },
-      'Q3': { loser: 'B2', team1: true },
-      'Q4': { loser: 'B2', team1: false },
-    };
-
-    const semiInfo = quarterToSemifinal[quarterType];
-    const loserInfo = semifinalLoser[quarterType];
-
-    if (semiInfo) {
-      // Aggiorna semifinale principale (1°-4°)
-      const semiMatch = await db.get(
-        'SELECT * FROM matches WHERE phase = ? AND match_type = ?',
-        ['semifinals', semiInfo.winner]
-      );
-
-      if (semiMatch) {
-        if (semiInfo.team1) {
-          await db.run(
-            'UPDATE matches SET team1_id = ? WHERE id = ?',
-            [winnerId, semiMatch.id]
-          );
-        } else {
-          await db.run(
-            'UPDATE matches SET team2_id = ? WHERE id = ?',
-            [winnerId, semiMatch.id]
-          );
-        }
-      }
+async function populateSemifinalsNew(tournamentId, quarterType, winnerPairId, loserPairId) {
+  const quarterToSemifinal = { Q1: { winner: 'A1', team1: true }, Q2: { winner: 'A1', team1: false }, Q3: { winner: 'A2', team1: true }, Q4: { winner: 'A2', team1: false } };
+  const semifinalLoser = { Q1: { loser: 'B1', team1: true }, Q2: { loser: 'B1', team1: false }, Q3: { loser: 'B2', team1: true }, Q4: { loser: 'B2', team1: false } };
+  const semiInfo = quarterToSemifinal[quarterType];
+  const loserInfo = semifinalLoser[quarterType];
+  if (semiInfo) {
+    const semiMatch = await db.get('SELECT * FROM matches WHERE tournament_id = ? AND phase = ? AND match_type = ?', [tournamentId, 'semifinals', semiInfo.winner]);
+    if (semiMatch) {
+      await db.run(semiInfo.team1 ? 'UPDATE matches SET pair1_id = ? WHERE id = ?' : 'UPDATE matches SET pair2_id = ? WHERE id = ?', [winnerPairId, semiMatch.id]);
     }
-
-    if (loserInfo) {
-      // Aggiorna semifinale consolazione (5°-8°)
-      const loserMatch = await db.get(
-        'SELECT * FROM matches WHERE phase = ? AND match_type = ?',
-        ['semifinals', loserInfo.loser]
-      );
-
-      if (loserMatch) {
-        if (loserInfo.team1) {
-          await db.run(
-            'UPDATE matches SET team1_id = ? WHERE id = ?',
-            [loserId, loserMatch.id]
-          );
-        } else {
-          await db.run(
-            'UPDATE matches SET team2_id = ? WHERE id = ?',
-            [loserId, loserMatch.id]
-          );
-        }
-      }
+  }
+  if (loserInfo) {
+    const loserMatch = await db.get('SELECT * FROM matches WHERE tournament_id = ? AND phase = ? AND match_type = ?', [tournamentId, 'semifinals', loserInfo.loser]);
+    if (loserMatch) {
+      await db.run(loserInfo.team1 ? 'UPDATE matches SET pair1_id = ? WHERE id = ?' : 'UPDATE matches SET pair2_id = ? WHERE id = ?', [loserPairId, loserMatch.id]);
     }
-  } catch (error) {
-    console.error('Errore nel popolamento semifinali:', error);
+  }
+}
+
+async function populateFinalsNew(tournamentId, semifinalType, winnerPairId, loserPairId) {
+  const semifinalToFinal = { A1: { winner: 'final_1_2', team1: true }, A2: { winner: 'final_1_2', team1: false }, B1: { winner: 'final_5_6', team1: true }, B2: { winner: 'final_5_6', team1: false } };
+  const finalLoser = { A1: { loser: 'final_3_4', team1: true }, A2: { loser: 'final_3_4', team1: false }, B1: { loser: 'final_7_8', team1: true }, B2: { loser: 'final_7_8', team1: false } };
+  const finalInfo = semifinalToFinal[semifinalType];
+  const loserInfo = finalLoser[semifinalType];
+  if (finalInfo) {
+    const finalMatch = await db.get('SELECT * FROM matches WHERE tournament_id = ? AND phase = ? AND match_type = ?', [tournamentId, 'finals', finalInfo.winner]);
+    if (finalMatch) await db.run(finalInfo.team1 ? 'UPDATE matches SET pair1_id = ? WHERE id = ?' : 'UPDATE matches SET pair2_id = ? WHERE id = ?', [winnerPairId, finalMatch.id]);
+  }
+  if (loserInfo) {
+    const loserMatch = await db.get('SELECT * FROM matches WHERE tournament_id = ? AND phase = ? AND match_type = ?', [tournamentId, 'finals', loserInfo.loser]);
+    if (loserMatch) await db.run(loserInfo.team1 ? 'UPDATE matches SET pair1_id = ? WHERE id = ?' : 'UPDATE matches SET pair2_id = ? WHERE id = ?', [loserPairId, loserMatch.id]);
   }
 }
 
 /**
- * Popola le finali basandosi sui risultati delle semifinali
+ * Aggiorna statistiche giocatori dopo una partita (usa pairs -> user_id)
  */
-async function populateFinals(semifinalType, winnerId, loserId) {
+export async function updatePlayerStatsFromMatch(pair1Id, pair2Id, winnerPairId) {
   try {
-    // Mappa semifinali → finali
-    const semifinalToFinal = {
-      'A1': { winner: 'final_1_2', team1: true },
-      'A2': { winner: 'final_1_2', team1: false },
-      'B1': { winner: 'final_5_6', team1: true },
-      'B2': { winner: 'final_5_6', team1: false },
-    };
-
-    const finalLoser = {
-      'A1': { loser: 'final_3_4', team1: true },
-      'A2': { loser: 'final_3_4', team1: false },
-      'B1': { loser: 'final_7_8', team1: true },
-      'B2': { loser: 'final_7_8', team1: false },
-    };
-
-    const finalInfo = semifinalToFinal[semifinalType];
-    const loserInfo = finalLoser[semifinalType];
-
-    if (finalInfo) {
-      // Aggiorna finale principale
-      const finalMatch = await db.get(
-        'SELECT * FROM matches WHERE phase = ? AND match_type = ?',
-        ['finals', finalInfo.winner]
-      );
-
-      if (finalMatch) {
-        if (finalInfo.team1) {
-          await db.run(
-            'UPDATE matches SET team1_id = ? WHERE id = ?',
-            [winnerId, finalMatch.id]
-          );
-        } else {
-          await db.run(
-            'UPDATE matches SET team2_id = ? WHERE id = ?',
-            [winnerId, finalMatch.id]
-          );
-        }
-      }
+    const p1 = await db.get('SELECT user1_id, user2_id FROM pairs WHERE id = ?', [pair1Id]);
+    const p2 = await db.get('SELECT user1_id, user2_id FROM pairs WHERE id = ?', [pair2Id]);
+    if (!p1 || !p2) return;
+    const winnerIds = winnerPairId === pair1Id ? [p1.user1_id, p1.user2_id] : [p2.user1_id, p2.user2_id];
+    const loserIds = winnerPairId === pair1Id ? [p2.user1_id, p2.user2_id] : [p1.user1_id, p1.user2_id];
+    for (const uid of winnerIds) {
+      await db.run(`UPDATE player_stats SET matches_played = matches_played + 1, wins = wins + 1, win_percentage = CAST(wins + 1 AS REAL) / CAST(matches_played + 1 AS REAL) * 100 WHERE user_id = ?`, [uid]);
     }
-
-    if (loserInfo) {
-      // Aggiorna finale consolazione
-      const loserMatch = await db.get(
-        'SELECT * FROM matches WHERE phase = ? AND match_type = ?',
-        ['finals', loserInfo.loser]
-      );
-
-      if (loserMatch) {
-        if (loserInfo.team1) {
-          await db.run(
-            'UPDATE matches SET team1_id = ? WHERE id = ?',
-            [loserId, loserMatch.id]
-          );
-        } else {
-          await db.run(
-            'UPDATE matches SET team2_id = ? WHERE id = ?',
-            [loserId, loserMatch.id]
-          );
-        }
-      }
+    for (const uid of loserIds) {
+      await db.run(`UPDATE player_stats SET matches_played = matches_played + 1, losses = losses + 1, win_percentage = CAST(wins AS REAL) / CAST(matches_played + 1 AS REAL) * 100 WHERE user_id = ?`, [uid]);
     }
   } catch (error) {
-    console.error('Errore nel popolamento finali:', error);
+    console.error('Errore update stats:', error);
   }
 }
 
-/**
- * Crea la struttura iniziale del torneo
- */
-export async function createTournamentBracket() {
-  try {
-    // Verifica se il torneo esiste già
-    const existing = await db.get('SELECT COUNT(*) as count FROM matches');
-    if (existing.count > 0) {
-      return; // Torneo già creato
-    }
-
-    // Recupera tutte le squadre
-    const teams = await db.all('SELECT * FROM teams ORDER BY id LIMIT 8');
-    
-    if (teams.length < 8) {
-      throw new Error('Servono almeno 8 squadre per creare il torneo');
-    }
-
-    // Crea partite quarti di finale
-    const quarters = [
-      { type: 'Q1', team1: teams[0].id, team2: teams[1].id },
-      { type: 'Q2', team1: teams[2].id, team2: teams[3].id },
-      { type: 'Q3', team1: teams[4].id, team2: teams[5].id },
-      { type: 'Q4', team1: teams[6].id, team2: teams[7].id },
-    ];
-
-    for (const q of quarters) {
-      await db.run(
-        'INSERT INTO matches (phase, match_type, team1_id, team2_id) VALUES (?, ?, ?, ?)',
-        ['quarters', q.type, q.team1, q.team2]
-      );
-    }
-
-    // Crea partite semifinali (con team null, verranno popolati automaticamente)
-    const semifinals = [
-      { type: 'A1', team1: null, team2: null }, // Vinc. Q1 vs Vinc. Q2
-      { type: 'A2', team1: null, team2: null }, // Vinc. Q3 vs Vinc. Q4
-      { type: 'B1', team1: null, team2: null }, // Perd. Q1 vs Perd. Q2
-      { type: 'B2', team1: null, team2: null }, // Perd. Q3 vs Perd. Q4
-    ];
-
-    for (const s of semifinals) {
-      await db.run(
-        'INSERT INTO matches (phase, match_type, team1_id, team2_id) VALUES (?, ?, ?, ?)',
-        ['semifinals', s.type, s.team1, s.team2]
-      );
-    }
-
-    // Crea partite finali
-    const finals = [
-      { type: 'final_1_2', team1: null, team2: null }, // Vinc. A1 vs Vinc. A2
-      { type: 'final_3_4', team1: null, team2: null }, // Perd. A1 vs Perd. A2
-      { type: 'final_5_6', team1: null, team2: null }, // Vinc. B1 vs Vinc. B2
-      { type: 'final_7_8', team1: null, team2: null }, // Perd. B1 vs Perd. B2
-    ];
-
-    for (const f of finals) {
-      await db.run(
-        'INSERT INTO matches (phase, match_type, team1_id, team2_id) VALUES (?, ?, ?, ?)',
-        ['finals', f.type, f.team1, f.team2]
-      );
-    }
-
-    console.log('Tabellone torneo creato con successo');
-  } catch (error) {
-    console.error('Errore nella creazione tabellone:', error);
-    throw error;
-  }
-}
