@@ -1,100 +1,99 @@
 import express from 'express';
 import db from '../models/database.js';
-import { createTournamentBracket } from '../controllers/tournamentController.js';
+import { requireAuth } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// GET /api/tournament/bracket - Recupera tabellone completo
-router.get('/bracket', async (req, res) => {
+// Helper: recupera match con nomi coppie
+async function getMatchesWithNames(tournamentId) {
+  const matches = await db.all(
+    `SELECT m.*,
+      (SELECT COALESCE(u1.nickname,u1.name) || '-' || COALESCE(u2.nickname,u2.name) FROM pairs p JOIN users u1 ON p.user1_id=u1.id JOIN users u2 ON p.user2_id=u2.id WHERE p.id=m.pair1_id) as team1_name,
+      (SELECT COALESCE(u1.nickname,u1.name) || '-' || COALESCE(u2.nickname,u2.name) FROM pairs p JOIN users u1 ON p.user1_id=u1.id JOIN users u2 ON p.user2_id=u2.id WHERE p.id=m.pair2_id) as team2_name,
+      (SELECT COALESCE(u1.nickname,u1.name) || '-' || COALESCE(u2.nickname,u2.name) FROM pairs p JOIN users u1 ON p.user1_id=u1.id JOIN users u2 ON p.user2_id=u2.id WHERE p.id=m.winner_pair_id) as winner_name
+     FROM matches m WHERE m.tournament_id = ? ORDER BY
+       CASE m.phase WHEN 'quarters' THEN 1 WHEN 'semifinals' THEN 2 WHEN 'finals' THEN 3 END,
+       m.match_type`,
+    [tournamentId]
+  );
+  // Alias per compatibilità frontend: team1_id/team2_id/winner_id
+  return matches.map((m) => ({
+    ...m,
+    team1_id: m.pair1_id,
+    team2_id: m.pair2_id,
+    winner_id: m.winner_pair_id,
+    team1_name: m.team1_name || '-',
+    team2_name: m.team2_name || '-',
+    winner_name: m.winner_name || null,
+  }));
+}
+
+// GET /api/tournament/bracket - Tabellone primo torneo attivo o ultimo
+router.get('/bracket', requireAuth, async (req, res) => {
   try {
-    const matches = await db.all(`
-      SELECT m.*,
-             t1.name as team1_name,
-             t1.player1_id as team1_player1_id,
-             t1.player2_id as team1_player2_id,
-             p1_1.name as team1_player1_name,
-             p1_2.name as team1_player2_name,
-             t2.name as team2_name,
-             t2.player1_id as team2_player1_id,
-             t2.player2_id as team2_player2_id,
-             p2_1.name as team2_player1_name,
-             p2_2.name as team2_player2_name,
-             w.name as winner_name
-      FROM matches m
-      LEFT JOIN teams t1 ON m.team1_id = t1.id
-      LEFT JOIN teams t2 ON m.team2_id = t2.id
-      LEFT JOIN teams w ON m.winner_id = w.id
-      LEFT JOIN players p1_1 ON t1.player1_id = p1_1.id
-      LEFT JOIN players p1_2 ON t1.player2_id = p1_2.id
-      LEFT JOIN players p2_1 ON t2.player1_id = p2_1.id
-      LEFT JOIN players p2_2 ON t2.player2_id = p2_2.id
-      ORDER BY 
-        CASE m.phase
-          WHEN 'quarters' THEN 1
-          WHEN 'semifinals' THEN 2
-          WHEN 'finals' THEN 3
-        END,
-        m.match_type
-    `);
+    const t = await db.get(
+      'SELECT id FROM tournaments WHERE status IN ("active","draft","completed") ORDER BY date DESC, id DESC LIMIT 1'
+    );
+    if (!t) return res.json({ quarters: [], semifinals: [], finals: [] });
 
-    // Organizza per fase
-    const bracket = {
-      quarters: matches.filter(m => m.phase === 'quarters'),
-      semifinals: matches.filter(m => m.phase === 'semifinals'),
-      finals: matches.filter(m => m.phase === 'finals')
-    };
-
-    res.json(bracket);
+    const matches = await getMatchesWithNames(t.id);
+    res.json({
+      quarters: matches.filter((m) => m.phase === 'quarters'),
+      semifinals: matches.filter((m) => m.phase === 'semifinals'),
+      finals: matches.filter((m) => m.phase === 'finals'),
+    });
   } catch (error) {
-    console.error('Errore nel recupero tabellone:', error);
+    console.error('Errore GET bracket:', error);
     res.status(500).json({ error: 'Errore nel recupero tabellone' });
   }
 });
 
-// POST /api/tournament/reset - Reset torneo
-router.post('/reset', async (req, res) => {
+// GET /api/tournament/teams - Coppie del torneo corrente (come "teams")
+router.get('/teams', requireAuth, async (req, res) => {
   try {
-    // Elimina tutte le partite
-    await db.run('DELETE FROM matches');
-    
-    // Reset statistiche giocatori
-    await db.run(`
-      UPDATE player_stats 
-      SET total_score = 0,
-          matches_played = 0,
-          wins = 0,
-          losses = 0,
-          win_percentage = 0
-    `);
+    const t = await db.get(
+      'SELECT id FROM tournaments WHERE status IN ("active","draft","completed") ORDER BY date DESC LIMIT 1'
+    );
+    if (!t) return res.json([]);
 
-    // Ricrea tabellone
-    await createTournamentBracket();
-
-    res.json({ message: 'Torneo resettato con successo' });
+    const pairs = await db.all(
+      `SELECT p.id, p.tournament_id, p.user1_id, p.user2_id,
+        u1.name as player1_name, u1.nickname as p1_nick, u1.photo_url as player1_avatar,
+        u2.name as player2_name, u2.nickname as p2_nick, u2.photo_url as player2_avatar
+       FROM pairs p
+       JOIN users u1 ON p.user1_id = u1.id JOIN users u2 ON p.user2_id = u2.id
+       WHERE p.tournament_id = ? ORDER BY p.id`,
+      [t.id]
+    );
+    res.json(
+      pairs.map((row) => ({
+        id: row.id,
+        name: (row.p1_nick || row.player1_name) + '-' + (row.p2_nick || row.player2_name),
+        player1_id: row.user1_id,
+        player2_id: row.user2_id,
+        player1_name: row.player1_name,
+        player2_name: row.player2_name,
+        player1_avatar: row.player1_avatar,
+        player2_avatar: row.player2_avatar,
+      }))
+    );
   } catch (error) {
-    console.error('Errore nel reset torneo:', error);
-    res.status(500).json({ error: 'Errore nel reset torneo' });
+    console.error('Errore GET teams:', error);
+    res.status(500).json({ error: 'Errore nel recupero squadre' });
   }
 });
 
-// GET /api/tournament/teams - Lista squadre
-router.get('/teams', async (req, res) => {
+// POST /api/tournament/reset - Reset torneo corrente (solo admin, Phase 3)
+router.post('/reset', requireAuth, async (req, res) => {
+  if (req.user?.role !== 'admin') return res.status(403).json({ error: 'Solo admin' });
   try {
-    const teams = await db.all(`
-      SELECT t.*,
-             p1.name as player1_name,
-             p1.avatar_url as player1_avatar,
-             p2.name as player2_name,
-             p2.avatar_url as player2_avatar
-      FROM teams t
-      LEFT JOIN players p1 ON t.player1_id = p1.id
-      LEFT JOIN players p2 ON t.player2_id = p2.id
-      ORDER BY t.name
-    `);
-    res.json(teams);
+    const t = await db.get('SELECT id FROM tournaments ORDER BY date DESC LIMIT 1');
+    if (!t) return res.json({ message: 'Nessun torneo da resettare' });
+    await db.run('DELETE FROM matches WHERE tournament_id = ?', [t.id]);
+    res.json({ message: 'Partite eliminate. Ricrea coppie e tabellone.' });
   } catch (error) {
-    console.error('Errore nel recupero squadre:', error);
-    res.status(500).json({ error: 'Errore nel recupero squadre' });
+    console.error('Errore reset:', error);
+    res.status(500).json({ error: 'Errore nel reset' });
   }
 });
 

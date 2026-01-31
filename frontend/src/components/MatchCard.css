@@ -51,9 +51,14 @@
 }
 
 .team.winner {
-  background: var(--color-primary);
+  background: var(--color-success);
   color: white;
   font-weight: 600;
+}
+
+.team.loser {
+  background: #FEF2F2;
+  border: 1px solid rgba(231, 76, 60, 0.3);
 }
 
 .team-name {

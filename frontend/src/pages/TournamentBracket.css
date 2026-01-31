@@ -26,9 +26,43 @@
   color: var(--color-primary);
 }
 
+.tournament-header {
+  flex-wrap: wrap;
+}
+
 .tournament-header h1 {
   font-size: 2rem;
   color: var(--color-text);
+  flex: 1;
+}
+
+.tournament-meta {
+  width: 100%;
+  font-size: 0.95rem;
+  color: var(--color-text-light);
+  margin-top: 0.25rem;
+}
+
+.tournament-actions {
+  margin-top: 0.5rem;
+}
+
+.action-link {
+  background: transparent;
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.action-link:hover {
+  color: var(--color-primary-dark);
+}
+
+.empty-bracket {
+  text-align: center;
+  color: var(--color-text-light);
+  padding: 2rem;
 }
 
 .tournament-phase {

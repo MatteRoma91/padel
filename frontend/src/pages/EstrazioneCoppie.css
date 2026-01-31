@@ -1,0 +1,98 @@
+.estrazione-page {
+  min-height: 100vh;
+  background: var(--color-bg-light);
+  padding: 2rem 1rem;
+}
+
+.estrazione-header {
+  margin-bottom: 2rem;
+}
+
+.estrazione-header h1 {
+  font-size: 2rem;
+  color: var(--color-text);
+}
+
+.tournament-name {
+  font-size: 1.1rem;
+  color: var(--color-text-light);
+  margin-top: 0.25rem;
+}
+
+.estrazione-actions {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.estrazione-actions .action-button {
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+
+.estrazione-actions .action-button.primary {
+  background: var(--color-primary);
+  color: var(--color-text);
+}
+
+.estrazione-actions .action-button.danger {
+  background: var(--color-danger);
+  color: white;
+}
+
+.estrazione-actions .action-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.estrazione-hint {
+  font-size: 0.9rem;
+  color: var(--color-text-light);
+  margin-bottom: 2rem;
+}
+
+.pairs-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.pair-card {
+  background: white;
+  border-radius: var(--border-radius);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-sm);
+  border: 2px solid var(--color-border);
+  transition: var(--transition);
+}
+
+.pair-card:hover {
+  border-color: var(--color-primary);
+}
+
+.pair-number {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--color-text-light);
+  margin-bottom: 0.5rem;
+}
+
+.pair-names {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.pair-categories {
+  font-size: 0.85rem;
+  color: var(--color-text-light);
+  margin-top: 0.35rem;
+}
+
+.empty {
+  text-align: center;
+  color: var(--color-text-light);
+  padding: 3rem;
+}
